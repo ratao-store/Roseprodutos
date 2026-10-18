@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Rose Produtos - Natura & Beleza</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <header>
+    <h1>Rose Produtos</h1>
+    <div class="user-controls">
+      <div id="user-info" class="hidden">
+        <span id="user-name"></span>
+        <button id="btn-logout" class="btn btn-rosa">Sair</button>
+      </div>
+      <button id="btn-login-google" class="btn btn-google">
+        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="18" alt="Google">
+        Entrar com Google
+      </button>
+    </div>
+  </header>
+
+  <main class="container">
+    <h2>Nossos Produtos Natura</h2>
+    <div id="grid-produtos" class="produtos-grid">
+      <p>Carregando catálogo...</p>
+    </div>
+  </main>
+
+  <!-- Botão Flutuante do Carrinho -->
+  <div id="btn-carrinho" class="carrinho-float" onclick="abrirCarrinho()">
+    🛒 Carrinho (<span id="cart-count">0</span>)
+  </div>
+
+  <!-- Modal do Carrinho -->
+  <div id="modal-carrinho" class="modal hidden">
+    <div class="modal-content">
+      <h2>Seu Carrinho</h2>
+      <div id="cart-items" style="margin: 1rem 0;"></div>
+      <p><strong>Total: R$ <span id="cart-total">0.00</span></strong></p>
+      <br>
+      <button class="btn btn-whatsapp" onclick="finalizarPedidoWhats()">Enviar Pedido no WhatsApp</button>
+      <br><br>
+      <button class="btn btn-danger" onclick="fecharCarrinho()">Fechar</button>
+    </div>
+  </div>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
