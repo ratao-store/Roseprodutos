@@ -3,12 +3,13 @@ import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChang
 import { getFirestore, collection, doc, getDoc, getDocs, setDoc, addDoc, updateDoc, deleteDoc, onSnapshot, query, where } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 const firebaseConfig = {
-  apiKey: "SUA_API_KEY",
-  authDomain: "SEU_PROJETO.firebaseapp.com",
-  projectId: "SEU_PROJETO",
-  storageBucket: "SEU_PROJETO.appspot.com",
-  messagingSenderId: "SEU_SENDER_ID",
-  appId: "SEU_APP_ID"
+  apiKey: "AIzaSyBkKGgytdELAWzW0pypCYSqvJyACc1yn98",
+  authDomain: "rose-produtos.firebaseapp.com",
+  projectId: "rose-produtos",
+  storageBucket: "rose-produtos.firebasestorage.app",
+  messagingSenderId: "794373598349",
+  appId: "1:794373598349:web:7cc702a65c01a764fd06c4",
+  measurementId: "G-KPC6MS2J2W"
 };
 
 const app = initializeApp(firebaseConfig);
