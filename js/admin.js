@@ -1,35 +1,37 @@
-import { auth, db } from './firebase.js';
-import { 
-  signInWithEmailAndPassword, 
-  onAuthStateChanged 
-} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-import { 
-  collection, 
-  addDoc, 
-  getDocs, 
-  deleteDoc, 
-  doc 
-} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+// Configuração direta para evitar cache no GitHub Pages
+const firebaseConfig = {
+  apiKey: "AIzaSyBkKGgytdELAWzW0pypCYSqvJyACc1yn98",
+  authDomain: "rose-produtos.firebaseapp.com",
+  projectId: "rose-produtos",
+  storageBucket: "rose-produtos.firebasestorage.app",
+  messagingSenderId: "794373598349",
+  appId: "1:794373598349:web:7cc702a65c01a764fd06c4",
+  measurementId: "G-KPC6MS2J2W"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
 
 const loginBox = document.getElementById('admin-login-box');
 const adminContent = document.getElementById('admin-content');
 const formAdminLogin = document.getElementById('form-admin-login');
 
-// Monitoriza o estado da sessão
 onAuthStateChanged(auth, (user) => {
   if (user) {
-    console.log("Utilizador autenticado:", user.email);
     if (loginBox) loginBox.style.display = 'none';
     if (adminContent) adminContent.style.display = 'block';
     carregarProdutosAdmin();
   } else {
-    console.log("Nenhum utilizador logado.");
     if (loginBox) loginBox.style.display = 'block';
     if (adminContent) adminContent.style.display = 'none';
   }
 });
 
-// Executa o login ao submeter o formulário
 if (formAdminLogin) {
   formAdminLogin.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -38,46 +40,39 @@ if (formAdminLogin) {
     const senha = inputs[1].value;
 
     try {
-      console.log("A tentar iniciar sessão com:", email);
       await signInWithEmailAndPassword(auth, email, senha);
       alert("Login efetuado com sucesso!");
     } catch (error) {
-      console.error("Erro detalhado no login:", error.code, error.message);
       alert("Erro ao entrar: " + error.message);
     }
   });
 }
 
-// Cadastrar Novo Produto
 const formProduto = document.getElementById('form-produto');
 if (formProduto) {
   formProduto.addEventListener('submit', async (e) => {
     e.preventDefault();
-
     const nome = document.getElementById('prod-nome').value;
     const preco = document.getElementById('prod-preco').value;
     const imagem = document.getElementById('prod-img').value;
 
     try {
       await addDoc(collection(db, "produtos"), {
-        nome: nome,
+        nome,
         preco: Number(preco),
-        imagem: imagem,
+        imagem,
         categoria: "Natura",
         criadoEm: new Date()
       });
-
       alert("Produto cadastrado com sucesso!");
       formProduto.reset();
       carregarProdutosAdmin();
     } catch (error) {
-      console.error("Erro ao cadastrar produto:", error);
       alert("Erro ao salvar produto: " + error.message);
     }
   });
 }
 
-// Listar Produtos no Painel Admin
 async function carregarProdutosAdmin() {
   const listaContainer = document.getElementById('admin-produtos-lista');
   if (!listaContainer) return;
