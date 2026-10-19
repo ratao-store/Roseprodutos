@@ -1,81 +1,39 @@
-import { auth, googleProvider, db } from './firebase.js';
-import { 
-  signInWithPopup, 
-  signInWithEmailAndPassword 
-} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-import { 
-  collection, 
-  getDocs 
-} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { db } from './firebase.js';
+import { collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-// 1. Configurar Login com Google
-const btnGoogle = document.getElementById('btn-google-login');
-if (btnGoogle) {
-  btnGoogle.addEventListener('click', async () => {
-    try {
-      const result = await signInWithPopup(auth, googleProvider);
-      alert(`Bem-vindo(a), ${result.user.displayName || 'Utilizador'}!`);
-    } catch (error) {
-      console.error("Erro no login Google:", error);
-      alert("Erro ao entrar com o Google: " + error.message);
-    }
-  });
-}
-
-// 2. Configurar Login com E-mail e Senha
-const formLogin = document.getElementById('form-login');
-if (formLogin) {
-  formLogin.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    
-    const inputs = formLogin.querySelectorAll('input');
-    const email = inputs[0].value;
-    const senha = inputs[1].value;
-
-    try {
-      await signInWithEmailAndPassword(auth, email, senha);
-      alert("Login efetuado com sucesso!");
-    } catch (error) {
-      console.error("Erro no login por e-mail:", error);
-      alert("Erro ao entrar: Verifique o e-mail e a senha digitados.");
-    }
-  });
-}
-
-// 3. Carregar Produtos do Firestore na Grelha (Bento Grid)
-async function carregarProdutos() {
-  const container = document.getElementById('produtos-container');
+async function carregarProdutosLoja() {
+  const container = document.getElementById('grid-produtos');
   if (!container) return;
 
   try {
     const querySnapshot = await getDocs(collection(db, "produtos"));
-    container.innerHTML = ""; // Limpa a mensagem/conteúdo anterior
+    container.innerHTML = "";
 
     if (querySnapshot.empty) {
-      container.innerHTML = "<p style='grid-column: 1/-1; text-align: center; color: var(--text-muted);'>Nenhum produto cadastrado no momento.</p>";
+      container.innerHTML = "<p style='color: var(--text-muted); grid-column: 1/-1; text-align: center;'>Nenhum produto cadastrado no momento.</p>";
       return;
     }
 
-    querySnapshot.forEach((doc) => {
-      const p = doc.data();
+    querySnapshot.forEach((documento) => {
+      const p = documento.data();
       const card = document.createElement('div');
-      card.className = 'product-card';
-      
+      card.style.cssText = "background: white; border-radius: 16px; padding: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); display: flex; flex-direction: column; justify-content: space-between;";
+
       card.innerHTML = `
-        <img src="${p.imagem || 'https://via.placeholder.com/300'}" class="product-img" alt="${p.nome}">
-        <div class="product-info">
-          <span class="product-category">${p.categoria || 'Natura'}</span>
-          <h3 class="product-title">${p.nome}</h3>
-          <div class="product-price">R$ ${parseFloat(p.preco || 0).toFixed(2)}</div>
-          <button class="btn-reserve" onclick="alert('Inicie sessão para reservar!')">Reservar</button>
+        <div>
+          <img src="${p.imagem}" alt="${p.nome}" style="width: 100%; height: 160px; object-fit: cover; border-radius: 12px; margin-bottom: 10px;">
+          <h3 style="font-size: 1rem; color: var(--text-dark); margin-bottom: 5px;">${p.nome}</h3>
+          <p style="font-size: 1.1rem; font-weight: 700; color: var(--primary); margin-bottom: 10px;">R$ ${Number(p.preco).toFixed(2)}</p>
         </div>
+        <button style="width: 100%; background: var(--primary); color: white; border: none; padding: 10px; border-radius: 10px; font-weight: 600; cursor: pointer;">Reservar</button>
       `;
       container.appendChild(card);
     });
   } catch (error) {
     console.error("Erro ao carregar produtos:", error);
+    container.innerHTML = "<p style='color: red; grid-column: 1/-1;'>Erro ao carregar os produtos.</p>";
   }
 }
 
-// Executa a procura de produtos assim que a página carrega
-carregarProdutos();
+// Carrega os produtos assim que a página abre
+document.addEventListener('DOMContentLoaded', carregarProdutosLoja);
