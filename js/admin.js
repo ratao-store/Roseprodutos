@@ -1,118 +1,122 @@
+import { auth, db } from './firebase.js';
 import { 
-  auth, db, signInWithEmailAndPassword, collection, doc, 
-  addDoc, updateDoc, deleteDoc, setDoc, onSnapshot 
-} from "./firebase.js";
+  signInWithEmailAndPassword, 
+  onAuthStateChanged 
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import { 
+  collection, 
+  addDoc, 
+  getDocs, 
+  deleteDoc, 
+  doc 
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-const loginBox = document.getElementById("admin-login-box");
-const panel = document.getElementById("admin-panel");
-const formLogin = document.getElementById("form-login-admin");
-const formProduto = document.getElementById("form-produto");
+const loginBox = document.getElementById('admin-login-box');
+const adminContent = document.getElementById('admin-content');
+const formAdminLogin = document.getElementById('form-admin-login');
 
-formLogin.addEventListener("submit", async (e) => {
-  e.preventDefault();
-  const email = document.getElementById("admin-email").value;
-  const senha = document.getElementById("admin-senha").value;
-
-  try {
-    await signInWithEmailAndPassword(auth, email, senha);
-    loginBox.classList.add("hidden");
-    panel.classList.remove("hidden");
-    carregarAdminProdutos();
-  } catch (err) {
-    alert("Dados inválidos de administrador.");
+// 1. Verificar se o utilizador já está logado
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    // Utilizador autenticado: esconde o login e mostra o painel
+    if (loginBox) loginBox.style.display = 'none';
+    if (adminContent) adminContent.style.display = 'block';
+    carregarProdutosAdmin();
+  } else {
+    // Não autenticado: mostra o login e esconde o painel
+    if (loginBox) loginBox.style.display = 'block';
+    if (adminContent) adminContent.style.display = 'none';
   }
 });
 
-formProduto.addEventListener("submit", async (e) => {
-  e.preventDefault();
-  const id = document.getElementById("prod-id").value;
-  const nome = document.getElementById("prod-nome").value;
-  const preco = parseFloat(document.getElementById("prod-preco").value);
-  const imagem = document.getElementById("prod-imagem").value;
+// 2. Fazer login no painel
+if (formAdminLogin) {
+  formAdminLogin.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const inputs = formAdminLogin.querySelectorAll('input');
+    const email = inputs[0].value;
+    const senha = inputs[1].value;
 
-  try {
-    if (id) {
-      await updateDoc(doc(db, "produtos", id), { nome, preco, imagem });
-      alert("Produto atualizado!");
-    } else {
-      await addDoc(collection(db, "produtos"), {
-        nome, preco, imagem, criadoEm: new Date()
-      });
-      alert("Produto criado!");
+    try {
+      await signInWithEmailAndPassword(auth, email, senha);
+      alert("Acesso autorizado!");
+    } catch (error) {
+      console.error("Erro no login admin:", error);
+      alert("Erro ao entrar: Verifique o e-mail e a senha.");
     }
-    limparFormulario();
-  } catch (err) {
-    alert("Erro ao salvar produto.");
-  }
-});
-
-function carregarAdminProdutos() {
-  onSnapshot(collection(db, "produtos"), (snapshot) => {
-    const listDiv = document.getElementById("admin-produtos-list");
-    listDiv.innerHTML = "";
-
-    snapshot.forEach(docSnap => {
-      const p = { id: docSnap.id, ...docSnap.data() };
-      const statusReserva = p.reserva ? `Reservado para: ${p.reserva.userName}` : 'Livre';
-
-      const row = document.createElement("div");
-      row.style = "display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #ccc; padding: 10px 0;";
-      row.innerHTML = `
-        <div>
-          <strong>${p.nome}</strong> - R$ ${p.preco.toFixed(2)}<br>
-          <small style="color: #666;">Status: ${statusReserva}</small>
-        </div>
-        <div style="display: flex; gap: 5px;">
-          <button class="btn btn-rosa" onclick="prepararEdicao('${p.id}', '${p.nome}', ${p.preco}, '${p.imagem}')">Editar</button>
-          ${p.reserva ? `<button class="btn btn-reserva" onclick="removerReserva('${p.id}')">Tirar Reserva</button>` : ''}
-          <button class="btn btn-danger" onclick="excluirProduto('${p.id}')">Remover</button>
-        </div>
-      `;
-      listDiv.appendChild(row);
-    });
   });
 }
 
-window.prepararEdicao = (id, nome, preco, imagem) => {
-  document.getElementById("prod-id").value = id;
-  document.getElementById("prod-nome").value = nome;
-  document.getElementById("prod-preco").value = preco;
-  document.getElementById("prod-imagem").value = imagem;
-  document.getElementById("form-title").textContent = "Editar Produto";
-  document.getElementById("btn-cancelar").classList.remove("hidden");
-};
+// 3. Cadastrar Novo Produto no Firestore
+const formProduto = document.getElementById('form-produto');
+if (formProduto) {
+  formProduto.addEventListener('submit', async (e) => {
+    e.preventDefault();
 
-window.limparFormulario = () => {
-  document.getElementById("prod-id").value = "";
-  formProduto.reset();
-  document.getElementById("form-title").textContent = "Cadastrar Produto";
-  document.getElementById("btn-cancelar").classList.add("hidden");
-};
+    const nome = document.getElementById('prod-nome').value;
+    const preco = document.getElementById('prod-preco').value;
+    const imagem = document.getElementById('prod-img').value;
 
-window.excluirProduto = async (id) => {
-  if (confirm("Deseja realmente apagar este produto?")) {
-    await deleteDoc(doc(db, "produtos", id));
-  }
-};
+    try {
+      await addDoc(collection(db, "produtos"), {
+        nome: nome,
+        preco: Number(preco),
+        imagem: imagem,
+        categoria: "Natura",
+        criadoEm: new Date()
+      });
 
-window.removerReserva = async (id) => {
-  if (confirm("Deseja liberar este produto da reserva?")) {
-    await updateDoc(doc(db, "produtos", id), { reserva: null });
-  }
-};
+      alert("Produto cadastrado com sucesso!");
+      formProduto.reset();
+      carregarProdutosAdmin();
+    } catch (error) {
+      console.error("Erro ao cadastrar produto:", error);
+      alert("Erro ao salvar produto: " + error.message);
+    }
+  });
+}
 
-window.banirUsuario = async () => {
-  const uid = document.getElementById("ban-uid").value.trim();
-  if (!uid) return alert("Digite o UID do usuário!");
+// 4. Listar Produtos no Painel Admin
+async function carregarProdutosAdmin() {
+  const listaContainer = document.getElementById('admin-produtos-lista');
+  if (!listaContainer) return;
 
   try {
-    await setDoc(doc(db, "banidos", uid), {
-      banidoEm: new Date(),
-      motivo: "Violação de regras"
+    const querySnapshot = await getDocs(collection(db, "produtos"));
+    listaContainer.innerHTML = "";
+
+    if (querySnapshot.empty) {
+      listaContainer.innerHTML = "<p style='color: var(--text-muted);'>Nenhum produto cadastrado.</p>";
+      return;
+    }
+
+    querySnapshot.forEach((documento) => {
+      const p = documento.data();
+      const div = document.createElement('div');
+      div.style.cssText = "display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--border-color);";
+      
+      div.innerHTML = `
+        <div>
+          <strong>${p.nome}</strong> - R$ ${Number(p.preco).toFixed(2)}
+        </div>
+        <button onclick="window.removerProduto('${documento.id}')" style="background: #ff4d4d; color: white; border: none; padding: 6px 12px; border-radius: 8px; cursor: pointer;">Excluir</button>
+      `;
+      listaContainer.appendChild(div);
     });
-    alert("Usuário banido com sucesso!");
-    document.getElementById("ban-uid").value = "";
-  } catch (err) {
-    alert("Erro ao banir usuário.");
+  } catch (error) {
+    console.error("Erro ao carregar lista:", error);
   }
+}
+
+// Função global para excluir produto
+window.removerProduto = async function(id) {
+  if (confirm("Tem certeza que deseja apagar este produto?")) {
+    try {
+      await deleteDoc(doc(db, "produtos", id));
+      alert("Produto apagado!");
+      carregarProdutosAdmin();
+    } catch (error) {
+      console.error("Erro ao apagar:", error);
+    }
+}
 };
