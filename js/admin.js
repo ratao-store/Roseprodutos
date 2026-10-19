@@ -15,39 +15,40 @@ const loginBox = document.getElementById('admin-login-box');
 const adminContent = document.getElementById('admin-content');
 const formAdminLogin = document.getElementById('form-admin-login');
 
-// 1. Verificar se o utilizador já está logado
+// Monitoriza o estado da sessão
 onAuthStateChanged(auth, (user) => {
   if (user) {
-    // Utilizador autenticado: esconde o login e mostra o painel
+    console.log("Utilizador autenticado:", user.email);
     if (loginBox) loginBox.style.display = 'none';
     if (adminContent) adminContent.style.display = 'block';
     carregarProdutosAdmin();
   } else {
-    // Não autenticado: mostra o login e esconde o painel
+    console.log("Nenhum utilizador logado.");
     if (loginBox) loginBox.style.display = 'block';
     if (adminContent) adminContent.style.display = 'none';
   }
 });
 
-// 2. Fazer login no painel
+// Executa o login ao submeter o formulário
 if (formAdminLogin) {
   formAdminLogin.addEventListener('submit', async (e) => {
     e.preventDefault();
     const inputs = formAdminLogin.querySelectorAll('input');
-    const email = inputs[0].value;
+    const email = inputs[0].value.trim();
     const senha = inputs[1].value;
 
     try {
+      console.log("A tentar iniciar sessão com:", email);
       await signInWithEmailAndPassword(auth, email, senha);
-      alert("Acesso autorizado!");
+      alert("Login efetuado com sucesso!");
     } catch (error) {
-      console.error("Erro no login admin:", error);
-      alert("Erro ao entrar: Verifique o e-mail e a senha.");
+      console.error("Erro detalhado no login:", error.code, error.message);
+      alert("Erro ao entrar: " + error.message);
     }
   });
 }
 
-// 3. Cadastrar Novo Produto no Firestore
+// Cadastrar Novo Produto
 const formProduto = document.getElementById('form-produto');
 if (formProduto) {
   formProduto.addEventListener('submit', async (e) => {
@@ -76,7 +77,7 @@ if (formProduto) {
   });
 }
 
-// 4. Listar Produtos no Painel Admin
+// Listar Produtos no Painel Admin
 async function carregarProdutosAdmin() {
   const listaContainer = document.getElementById('admin-produtos-lista');
   if (!listaContainer) return;
@@ -99,7 +100,7 @@ async function carregarProdutosAdmin() {
         <div>
           <strong>${p.nome}</strong> - R$ ${Number(p.preco).toFixed(2)}
         </div>
-        <button onclick="window.removerProduto('${documento.id}')" style="background: #ff4d4d; color: white; border: none; padding: 6px 12px; border-radius: 8px; cursor: pointer;">Excluir</button>
+        <button type="button" onclick="window.removerProduto('${documento.id}')" style="background: #ff4d4d; color: white; border: none; padding: 6px 12px; border-radius: 8px; cursor: pointer;">Excluir</button>
       `;
       listaContainer.appendChild(div);
     });
@@ -108,7 +109,6 @@ async function carregarProdutosAdmin() {
   }
 }
 
-// Função global para excluir produto
 window.removerProduto = async function(id) {
   if (confirm("Tem certeza que deseja apagar este produto?")) {
     try {
@@ -118,5 +118,5 @@ window.removerProduto = async function(id) {
     } catch (error) {
       console.error("Erro ao apagar:", error);
     }
-}
+  }
 };
