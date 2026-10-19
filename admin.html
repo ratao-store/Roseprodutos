@@ -1,60 +1,68 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Painel Admin - Rose Produtos</title>
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
   <header>
-    <h1>Painel Admin - Rose Produtos</h1>
+    <div class="header-container">
+      <div class="logo">🌸 Painel Admin</div>
+      <a href="index.html" style="color: var(--primary); text-decoration: none; font-weight: 600;">Ver Loja</a>
+    </div>
   </header>
 
-  <div class="container">
-    <!-- Tela de Login Admin -->
-    <div id="admin-login-box" class="admin-card">
+  <main style="max-width: 800px; margin: 30px auto; padding: 0 20px;">
+    
+    <!-- Caixa de Acesso -->
+    <div class="login-card" id="admin-login-box" style="max-width: 100%; margin-bottom: 30px;">
       <h2>Acesso Administrativo</h2>
-      <form id="form-login-admin">
-        <div class="form-group"><input type="email" id="admin-email" placeholder="E-mail Admin" required></div>
-        <div class="form-group"><input type="password" id="admin-senha" placeholder="Senha Secreta" required></div>
-        <button type="submit" class="btn btn-rosa">Acessar Painel</button>
+      <form id="form-admin-login">
+        <div class="input-group">
+          <span class="icon">👤</span>
+          <input type="email" placeholder="E-mail do Administrador" required>
+        </div>
+        <div class="input-group">
+          <span class="icon">🔒</span>
+          <input type="password" placeholder="Senha" required>
+        </div>
+        <button type="submit" class="btn-login-pink">Acessar Painel</button>
       </form>
     </div>
 
-    <!-- Conteúdo do Painel -->
-    <div id="admin-panel" class="hidden">
+    <!-- Secções de Gestão (Ocultas até fazer login) -->
+    <div id="admin-content" style="display: none;">
       
-      <!-- Cadastro / Edição de Produto -->
-      <div class="admin-card">
-        <h2 id="form-title">Cadastrar Produto</h2>
+      <!-- Cadastrar Produto -->
+      <div class="login-card" style="max-width: 100%; margin-bottom: 30px;">
+        <h2>Cadastrar Novo Produto</h2>
         <form id="form-produto">
-          <input type="hidden" id="prod-id">
-          <div class="form-group"><input type="text" id="prod-nome" placeholder="Nome do Produto" required></div>
-          <div class="form-group"><input type="number" step="0.01" id="prod-preco" placeholder="Preço (Ex: 49.90)" required></div>
-          <div class="form-group"><input type="url" id="prod-imagem" placeholder="URL da Imagem" required></div>
-          <button type="submit" class="btn btn-rosa" id="btn-salvar">Salvar Produto</button>
-          <button type="button" class="btn btn-danger hidden" id="btn-cancelar" onclick="limparFormulario()">Cancelar Edição</button>
+          <div class="input-group">
+            <input type="text" id="prod-nome" placeholder="Nome do Produto (ex: Natura Homem)" required>
+          </div>
+          <div class="input-group">
+            <input type="number" step="0.01" id="prod-preco" placeholder="Preço (ex: 240.99)" required>
+          </div>
+          <div class="input-group">
+            <input type="text" id="prod-img" placeholder="URL da Imagem do Produto" required>
+          </div>
+          <button type="submit" class="btn-login-pink">Salvar Produto</button>
         </form>
       </div>
 
-      <!-- Gerenciador de Produtos -->
-      <div class="admin-card">
-        <h2>Gerenciar Produtos e Reservas</h2>
-        <div id="admin-produtos-list" style="margin-top: 1rem;"></div>
-      </div>
-
-      <!-- Gerenciador de Banimentos -->
-      <div class="admin-card">
-        <h2>Banir Conta de Usuário</h2>
-        <div class="form-group">
-          <input type="text" id="ban-uid" placeholder="Cole o UID do Usuário que deseja banir">
+      <!-- Gerendar Produtos -->
+      <div class="login-card" style="max-width: 100%;">
+        <h2>Produtos e Reservas</h2>
+        <div id="admin-produtos-lista">
+          <!-- Lista carregada via JS -->
         </div>
-        <button onclick="banirUsuario()" class="btn btn-danger">Banir Usuário</button>
       </div>
 
     </div>
-  </div>
+  </main>
 
   <script type="module" src="js/admin.js"></script>
 </body>
